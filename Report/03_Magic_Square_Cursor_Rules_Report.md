@@ -1,0 +1,160 @@
+# 4×4 Magic Square — Cursor 프로젝트 규칙(.cursorrules) 보고서
+
+**문서 목적:** MagicSquare 저장소 루트의 `.cursorrules`에 정의된 프로젝트 규칙(코드 스타일, ECB 아키텍처, TDD, 테스트, 금지 패턴, 디렉터리 구조, AI 동작)을 **보고서 형태로 보관**한다.  
+**원본 파일:** 프로젝트 루트 `/.cursorrules`  
+**작성일:** 2026-04-28
+
+---
+
+## 요약
+
+| 구역 | 내용 |
+|------|------|
+| `project` | 4×4 마방진 Python 프로젝트, ECB·pytest TDD |
+| `code_style` | Python 3.10+, PEP 8, 타입 힌트·Google docstring, 88열 |
+| `architecture` | ECB 3레이어 및 의존성 방향 |
+| `tdd_rules` | RED / GREEN / REFACTOR 단계별 규칙·금지 |
+| `testing` | pytest, AAA, 커버리지 80%, fixture 범위·`test_` 명명 |
+| `forbidden` | print·매직값·광범위 except 등 대안 포함 |
+| `file_structure` | ECB 기준 디렉터리 트리 예시 |
+| `ai_behavior` | 코드 작성 전·중·후 Cursor AI 준수 사항 |
+
+---
+
+## 전체 규칙 (YAML)
+
+아래 내용은 해당 시점의 `.cursorrules`와 동일하다.
+
+```yaml
+################################################################################
+project:
+  name: MagicSquare
+  summary: >-
+    4×4 마방진(Magic Square) 생성·검증·탐색을 다루는 Python 프로젝트이다.
+    ECB(Entity-Control-Boundary) 3레이어와 pytest 기반 TDD로 구현한다.
+  scope:
+    - 1~16을 한 번씩 배치하고 행·열·대각선 합이 일치하는 규칙을 도메인에서 표현한다.
+    - CLI·API·UI 등 진입점과 비즈니스 절차·도메인 데이터를 분리한다.
+    - 타입 힌트와 테스트로 리팩터링과 기능 추가에 안전한 코드베이스를 유지한다.
+
+################################################################################
+code_style:
+  python_version: "3.10+"
+  style_guide: PEP 8 엄격 준수 (포맷은 Black 기준 88자와 일치시킨다)
+  type_hints: 모든 함수·메서드의 파라미터와 반환값에 타입 힌트 필수
+  docstring: Google 스타일; 모든 public 메서드에 필수
+  max_line_length: 88
+
+################################################################################
+architecture:
+  pattern: ECB (Entity–Control–Boundary)
+  layers:
+    boundary:
+      responsibility: 외부 입출력 담당
+      includes:
+        - UI (웹·데스크톱·기타 사용자 인터페이스)
+        - API (HTTP 등 외부 프로토콜 노출)
+        - CLI (콘솔 진입점·인자 파싱)
+      notes: 사용자·외부 시스템과의 경계에서 요청을 받고 응답을 돌려준다.
+    control:
+      responsibility: 비즈니스 로직·유스케이스 담당
+      includes:
+        - 마방진 생성·검증 절차의 오케스트레이션
+        - 탐색 전략 선택 및 entity 객체와의 협력
+      notes: 도메인 규칙을 호출하는 순서와 조건을 정한다. I/O 세부는 두지 않는다.
+    entity:
+      responsibility: 도메인 데이터 및 규칙 담당
+      includes:
+        - 격자·셀·합 등 핵심 모델과 불변식
+        - 마방진 정의에 따른 검증·변환 규칙
+      notes: 프레임워크·콘솔·네트워크에 의존하지 않는 순수 도메인 계층이다.
+  dependency_direction: >-
+    허용되는 의존성 방향은 boundary → control → entity 한 방향이다.
+    entity는 control·boundary를 알지 않으며 import하지 않는다.
+    control은 boundary를 참조하지 않는다(boundary가 control을 호출한다).
+    동일 레이어 간 순환 의존을 만들지 않는다.
+
+################################################################################
+tdd_rules:
+  red_phase:
+    description: 실패하는 테스트를 먼저 작성하고 RED를 확인하는 단계이다.
+    rules:
+      - 새 동작이나 버그 수정 전에 실패하는 테스트를 추가한다.
+      - 실패 원인이 요구사항과 일치하는지 확인한다.
+      - RED가 재현된 것을 확인한 뒤에만 GREEN 단계로 넘어간다.
+    must_not:
+      - 테스트 없이 프로덕션 코드만 넓게 작성한다.
+      - 테스트가 우연히 통과하는 상태를 성공으로 간주하고 넘어간다.
+  green_phase:
+    description: 테스트를 통과시키기 위한 최소 구현만 하는 단계이다.
+    rules:
+      - 현재 실패를 없애는 데 필요한 최소한의 코드만 추가·수정한다.
+      - 모든 관련 테스트가 녹색인지 확인한다.
+    must_not:
+      - 구조 개선·이름 변경·중복 제거 등 리팩터링을 수행한다.
+      - 아직 요구되지 않은 기능을 선제적으로 구현한다.
+  refactor_phase:
+    description: 외부 동작을 바꾸지 않고 설계와 가독성을 개선하는 단계이다.
+    rules:
+      - 공개 API·관찰 가능한 동작을 변경하지 않는다.
+      - 리팩터 전후로 동일 테스트 스위트가 통과해야 한다.
+      - 테스트·커버리지를 의미 있게 유지하며 필요 시 보완한다.
+    must_not:
+      - 리팩터링과 함께 새 기능을 섞어 넣는다.
+      - 테스트를 삭제하거나 약화시켜 통과만 맞춘다.
+
+################################################################################
+testing:
+  framework: pytest
+  pattern: AAA (Arrange–Act–Assert)
+  coverage_minimum: "80%"
+  fixture_scope:
+    default: function — 테스트 간 상태 공유를 피하고 격리를 기본으로 한다.
+    module: 동일 파일 내 무거운 객체를 한 번만 준비할 때만 사용하며 이유를 주석으로 남긴다.
+    session_or_package: 통합·슬로우 테스트 등 드문 경우에만 사용하고 문서화한다.
+    rule: function을 우선하고, 상위 스코프는 비용·명확한 근거가 있을 때만 쓴다.
+  naming_convention: 테스트 모듈·함수·메서드 이름은 test_ 접두사를 필수로 한다(pytest 수집 규칙).
+
+################################################################################
+forbidden:
+  - pattern: 디버깅·임시 확인 목적의 직접 print() 호출
+    reason: 출력이 테스트 출력과 섞이고 프로덕션에서 로깅 정책과 어긋난다.
+    alternative: logging 또는 boundary 계층에서 정의한 사용자 출력만 사용한다.
+  - pattern: 의미를 드러내지 않는 숫자·문자열 하드코딩(매직 넘버·매직 스트링)
+    reason: 의도 파악이 어렵고 변경 시 누락·불일치가 발생한다.
+    alternative: entity 또는 설정 모듈의 이름 있는 상수·Enum·설정 객체로 둔다.
+  - pattern: except 단독 또는 광범위 except로 예외를 무분별하게 삼키기
+    reason: 실제 오류를 숨기고 원인 추적을 방해한다.
+    alternative: 구체 예외를 잡거나 로깅 후 재던지기; 최상위 경계에서만 광범위 처리한다.
+
+################################################################################
+file_structure: |
+  # ECB 기준 디렉터리 뼈대 (프로젝트 루트 기준 예시)
+  magic_square/
+  ├── boundary/
+  │   ├── api/
+  │   ├── cli/
+  │   └── ui/
+  ├── control/
+  │   └── (유스케이스·애플리케이션 서비스)
+  ├── entity/
+  │   └── (도메인 모델·마방진 규칙)
+  └── tests/
+      ├── boundary/
+      ├── control/
+      └── entity/
+
+################################################################################
+ai_behavior:
+  before_code:
+    - 변경 대상과 인접한 tests/ 내 테스트 파일을 먼저 확인하고 기존 시나리오를 존중한다.
+    - 추가·수정할 코드가 boundary / control / entity 중 어디에 속하는지 정한 뒤 해당 패키지에만 둔다.
+  during_code:
+    - entity가 boundary·I/O·프레임워크에 의존하지 않도록 한다.
+    - control이 직접 콘솔·HTTP 등 외부 I/O에 묶이지 않도록 boundary를 경유한다.
+    - 타입 힌트가 없는 함수·메서드를 새로 만들지 않는다.
+  after_code:
+    - 수행한 작업이 tdd_rules의 RED / GREEN / REFACTOR 중 어느 단계에 해당하는지 스스로 검토한다.
+    - 제안이나 코드가 tdd_rules와 충돌하면 채팅에 한국어로 경고 문구를 출력하고 올바른 순서·대안을 제시한다.
+    - pytest로 검증할 수 있음을 안내하고 관련 테스트 실행을 제안한다.
+```
