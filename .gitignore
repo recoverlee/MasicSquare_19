@@ -11,3 +11,7 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+
+# Coverage HTML (`python -m pytest tests --cov=magicsquare --cov-report=html`)
+htmlcov/
+.coverage

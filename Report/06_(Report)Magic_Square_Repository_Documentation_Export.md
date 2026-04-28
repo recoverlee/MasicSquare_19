@@ -1,7 +1,7 @@
 # 4×4 Magic Square — 저장소 문서화 작업 내보내기 보고서
 
 **최종 갱신:** 2026-04-28  
-**문서 목적:** `Report/`에 보관된 산출물(01~05)의 역할을 요약하고, 프로젝트 루트·`docs/`에 추가·유지된 **문서화 작업 결과**를 한 파일에서 추적할 수 있게 한다.  
+**문서 목적:** `Report/`에 보관된 산출물(01~07)의 역할을 요약하고, 프로젝트 루트·`docs/`에 추가·유지된 **문서화 작업 결과**를 한 파일에서 추적할 수 있게 한다.  
 **관련:** 요구 단일 기준 [`docs/PRD.md`](../docs/PRD.md), PRD 동기 본 [`05_Magic_Square_PRD_Report.md`](05_Magic_Square_PRD_Report.md), Cursor 규칙 원본 [`/.cursorrules`](../.cursorrules)
 
 ---
@@ -10,7 +10,7 @@
 
 MagicSquare(4×4) 저장소는 **제품 요구(PRD)·설계(02)·규칙(03)·시나리오(04)**가 `Report/`와 `docs/`에 분산되어 있으며, **루트 [`README.md`](../README.md)**가 진입점·계약 요약·검증 기준·**개발 보드형 To-Do**를 제공하고, **[`docs/MasicSquare_Implementation_TODO.md`](../docs/MasicSquare_Implementation_TODO.md)**가 Phase별 체크리스트를 제공한다.
 
-본 보고서는 **문서 관계**, **완료된 문서 산출물**, 그리고 README에 반영된 **Epic / User Story / Task 체계·요구 추적 매트릭스**를 내보낸다.
+본 보고서는 **문서 관계**, **완료된 문서 산출물**(01~07), 그리고 README에 반영된 **Epic / User Story / Task 체계·요구 추적 매트릭스**를 내보낸다.
 
 ---
 
@@ -23,6 +23,7 @@ MagicSquare(4×4) 저장소는 **제품 요구(PRD)·설계(02)·규칙(03)·시
 | [`03_Magic_Square_Cursor_Rules_Report.md`](03_Magic_Square_Cursor_Rules_Report.md) | `.cursorrules` 보관본 — ECB, TDD 단계, 테스트·금지 패턴, 디렉터리 관례 |
 | [`04_Magic_Square_Epic_to_Technical_Scenarios.md`](04_Magic_Square_Epic_to_Technical_Scenarios.md) | Epic → Journey → User Story → Gherkin → 체크리스트 |
 | [`05_Magic_Square_PRD_Report.md`](05_Magic_Square_PRD_Report.md) | PRD 보고서 형태; 요구 본문은 `docs/PRD.md`와 동기 본(SSoT 정렬) |
+| [`07_Magic_Square_Test_Case_Specification_Report.md`](07_Magic_Square_Test_Case_Specification_Report.md) | 테스트 케이스 명세(TC-MS-A~D) 보고서; 본문은 `docs/Test_Case_Specification_Form.md`와 동기 본 |
 | **본 파일 (`06_…`)** | 저장소 문서화 작업·README To-Do 확장·추적 표의 **내보내기** |
 
 상세 본문은 각 파일을 참조한다.

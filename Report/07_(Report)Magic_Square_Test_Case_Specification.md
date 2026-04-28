@@ -1,7 +1,47 @@
+# 4×4 Magic Square — 테스트 케이스 명세 내보내기 보고서
+
+**내보내기일:** 2026-04-28  
+**문서 목적:** 스프레드시트 기반 테스트 케이스(TC-MS-A~D)를 **보고서 형태**로 `Report/`에 보관하고, 구현·검수 시 회귀 범위를 추적할 수 있게 한다. **Dual-Track UI + Logic TDD** 관점에서 **경계(UI)·도메인(Logic)** RED 매핑과 불변조건(Invariant) 추적을 포함한다.  
+**동기 본:** [`docs/Test_Case_Specification_Form.md`](../docs/Test_Case_Specification_Form.md) — 요약·표 형식의 본문은 해당 파일과 동일하게 유지한다. 갱신 시 **한쪽을 기준(SSoT)으로 정한 뒤** 다른 쪽을 맞춘다(본 보고서는 내보내기 메타·Dual-Track·관련 링크 절을 추가할 수 있다).  
+**관련:** 제품 계약 [`docs/PRD.md`](../docs/PRD.md) §6.1, PRD 보고서 [`05_Magic_Square_PRD_Report.md`](05_Magic_Square_PRD_Report.md), 입출력·Traceability·INV 정의 [`02_Magic_Square_Dual_Track_Clean_Architecture_Design_Report.md`](02_Magic_Square_Dual_Track_Clean_Architecture_Design_Report.md)
+
+---
+
 # 테스트 케이스 명세 (Magic Square 4×4)
 
 첨부 스프레드시트「Magic Square (4×4 마방진) — 테스트 케이스 명세서」를 아래 양식으로 정리한 문서입니다.  
-제품 계약은 [`PRD.md`](PRD.md)를 따릅니다.
+제품 계약은 [`docs/PRD.md`](../docs/PRD.md)를 따릅니다. **출력 계약**(1-index, `int[6]`, 마방진 상수 34, 빈칸 2·범위·중복)은 [`02_Magic_Square_Dual_Track_Clean_Architecture_Design_Report.md`](02_Magic_Square_Dual_Track_Clean_Architecture_Design_Report.md) §1과 정합성을 유지한다.
+
+---
+
+## Dual-Track RED (TDD) 개요
+
+TDD **RED** 단계에서는 구현 없이 **실패하는 테스트**만 추가한다. 본 프로젝트는 **Track A — UI / Boundary(경계)** 와 **Track B — Logic(도메인)** 를 병렬로 둔다. 두 트랙은 모두 같은 제품 계약을 검증하되, 레이어 책임이 다르다.
+
+| 트랙 | 역할 | 주로 다루는 TC |
+|------|------|----------------|
+| **UI RED** | `4×4 int[][]` 입출력, 예외·형식(`SIZE`, `EMPTY_COUNT`, `VALUE_RANGE`, `DUPLICATE`, 반환 길이 6, 좌표 1-index) | TC-MS-D-001 ~ D-007, TC-MS-C-001·C-002(출력 형식) |
+| **Logic RED** | 순수 규칙: `find_blank_coords`(행 우선 2개), `find_not_exist_nums`(누락 2개 오름차순), `is_magic_square`(행·열·대각선 합 일치·34), `solution`(첫 빈칸·작은 수 우선 시도 후 역배치) | TC-MS-A-001·002·006, TC-MS-B-001 ~ B-005, TC-MS-C-001 ~ C-008 |
+
+### Track A — UI / Boundary RED (요약)
+
+| Test ID | 시나리오 | 보호 Invariant / 매핑 TC |
+|---------|----------|---------------------------|
+| **UI-RED-01** | 4×4가 아닌 입력(크기·과장 행렬·비직사각) | INV-01 · **TC-MS-D-003**, **TC-MS-D-006** |
+| **UI-RED-02** | 빈칸(`0`) 개수가 정확히 2가 아님 | INV-02 · **TC-MS-D-007** (신규), TC-MS-A-003 ~ A-005는 단위·상위 연계 참고 |
+| **UI-RED-03** | 비어 있지 않은 칸이 1~16 범위 밖 | INV-03(범위) · **TC-MS-D-001** |
+| **UI-RED-04** | 0 제외 중복 숫자 | INV-03(중복) · **TC-MS-D-002** |
+| **UI-RED-05** | 반환 배열 길이가 6이 아님(또는 null) | 출력 스키마 · **TC-MS-C-001**, TC-MS-C-002 |
+| **UI-RED-06** | 반환 좌표가 1-index가 아님(또는 1~4 밖) | INV-05 · **TC-MS-C-001**, **TC-MS-C-002** |
+
+### Track B — Logic RED (요약)
+
+| Test ID | 시나리오 | 보호 Invariant / 매핑 TC |
+|---------|----------|---------------------------|
+| **LOGIC-RED-01** | `find_blank_coords`: row-major로 빈칸 **정확히 2개** | UC-01, 첫/둘째 빈칸 정의 · **TC-MS-A-001**, **TC-MS-A-002** |
+| **LOGIC-RED-02** | `find_not_exist_nums`: 누락 수 **2개**, **오름차순** | UC-02 · **TC-MS-A-006** (신규) |
+| **LOGIC-RED-03** | `is_magic_square`: 모든 행·열·두 대각선 합 동일·**34** | INV-04 · **TC-MS-B-001** ~ **TC-MS-B-005**, TC-MS-C-006 ~ C-008 |
+| **LOGIC-RED-04** | `solution`: (작은수→첫 빈칸, 큰수→둘째 빈칸) 우선, 실패 시 반대; **`int[6]`**, **1-index** | INV-06, UC-04 · **TC-MS-C-001**, **TC-MS-C-002** |
 
 ---
 
@@ -10,8 +50,8 @@
 | 항목 | 내용 |
 |------|------|
 | **프로젝트명** | Magic Square (4×4 마방진) |
-| **대상 시스템** | MagicSquare — 빈칸 탐색(`find_blank_coords`), 누락 숫자(`find_not_exist_nums`), 마방진 판정(`is_magic_square`), 해 도출(`solution()`), 경계·오류 처리(Boundary / Error); Dual-Track RED(UI / Logic)는 [`Report/07_Magic_Square_Test_Case_Specification_Report.md`](../Report/07_Magic_Square_Test_Case_Specification_Report.md) 참고 |
-| **단계** | 단위·통합 테스트 (기능별 TC A~D) |
+| **대상 시스템** | MagicSquare — 빈칸 탐색(`find_blank_coords`), **누락 숫자(`find_not_exist_nums`)**, 마방진 판정(`is_magic_square`), 해 도출(`solution()`), 경계·오류 처리(Boundary / Error); **Dual-Track RED**(UI / Logic) |
+| **단계** | 단위·통합 테스트 (기능별 TC A~D) + RED 트랙 매핑 |
 | **작성자** | *(기입)* |
 | **승인자** | *(기입)* |
 | **문서 상태** | 초안 |
@@ -93,10 +133,11 @@
 |------|------|
 | **테스트 ID** | TC-MS-A-006 |
 | **테스트 일자** | *(실행일 기입)* |
-| **테스트 목적** | (Logic RED) `1`~`16` 중 격자에 나타나지 않은 두 숫자를 오름차순 배열로 반환하는지 검증한다. |
+| **테스트 목적** | (Logic RED) `1`~`16` 중 격자에 나타나지 않은 **두 숫자**를 찾아 **오름차순** 배열로 반환하는지 검증한다. |
 | **테스트 기능** | `find_not_exist_nums` (또는 동등 API) |
-| **입력값** | 유효한 4×4 격자(빈칸 2개; 나머지 14칸은 중복 없이 1~16의 일부). |
-| **테스트 단계** | **Given** 누락 수가 알려진 픽스처 격자다(예: `{a,b}`, `a<b`).<br>**When** `find_not_exist_nums`를 호출한다.<br>**Then** 반환은 길이 2이며 `[a, b]`(오름차순)와 같다. |
+| **입력값** | INV-01~03을 만족하는 4×4 격자(빈칸 2개; 나머지 14칸은 중복 없이 1~16의 일부). |
+| **테스트 단계** | **Given** 누락 수가 알려진 픽스처 격자다(예: `{a,b}` 이고 `a<b`).<br>**When** `find_not_exist_nums`를 호출한다.<br>**Then** 반환은 길이 2이며 `[a, b]`와 같다(오름차순). |
+| **Invariant** | UC-02 — 누락된 두 정수, 정렬 오름차순. **LOGIC-RED-02** |
 
 ---
 
@@ -132,10 +173,11 @@
 |------|------|
 | **테스트 ID** | TC-MS-C-001 |
 | **테스트 일자** | *(실행일 기입)* |
-| **테스트 목적** | PRD 계약을 만족하는 입력(빈칸 2개)에서 해가 존재할 때 `solution()`이 기대하는 **6원소**·**1-index**·**배치 규칙**(작은 수→첫 빈칸·큰 수→둘째 빈칸 우선, 마방진이 되지 않으면 반대 순서)으로 반환하는지 검증한다. |
+| **테스트 목적** | PRD 계약을 만족하는 입력(빈칸 2개)에서 해가 존재할 때 `solution()`이 기대하는 **6원소**·**1-index 좌표**·**배치 규칙**(작은 수→첫 빈칸·큰 수→둘째 빈칸 우선 시도, 마방진이 되지 않으면 반대 순서)으로 반환하는지 검증한다. |
 | **테스트 기능** | `solution()` |
 | **입력값** | `0` 정확히 2개, 나머지는 중복 없이 1~16 범위인 유효 입력 격자. |
-| **테스트 단계** | **Given** 해가 있는 픽스처 격자다(첫/둘째 빈칸은 row-major 정의).<br>**When** `solution()`을 호출한다.<br>**Then** `[r1,c1,n1,r2,c2,n2]`가 길이 6이고 좌표가 1-index이며, `(n1,n2)` 순서가 설계 보고서의 두 조합 시도 규칙과 일치한다. |
+| **테스트 단계** | **Given** 해가 있는 픽스처 격자다(첫/둘째 빈칸은 row-major 정의).<br>**When** `solution()`을 호출한다.<br>**Then** `[r1,c1,n1,r2,c2,n2]`가 **길이 6**이고 좌표가 **1-index**이며, `(n1,n2)` 순서가 INV-06 / 설계 보고서 §1.1·§1.2의 두 조합 시도 규칙과 일치한다. |
+| **Invariant** | INV-05, INV-06 · **UI-RED-05**, **UI-RED-06**, **LOGIC-RED-04** |
 
 ---
 
@@ -275,15 +317,24 @@
 |------|------|
 | **테스트 ID** | TC-MS-D-007 |
 | **테스트 일자** | *(실행일 기입)* |
-| **테스트 목적** | (UI RED) 빈칸(`0`)이 정확히 2개가 아니면 공개 API가 PRD §6.1에 맞는 오류(예: `EMPTY_COUNT`)로 처리되는지 검증한다. |
+| **테스트 목적** | (UI RED) 빈칸(`0`)이 **정확히 2개가 아니면** 공개 API가 해를 도출하지 않고 PRD §6.1에 맞는 오류(예: `EMPTY_COUNT`)로 처리되는지 검증한다. |
 | **테스트 기능** | 경계 검증 / 공개 `solution` 또는 선행 Validate |
 | **입력값** | 4×4이지만 `0`의 개수가 0, 1, 3, … 인 격자. |
-| **테스트 단계** | **Given** 빈칸 개수가 계약과 다르다.<br>**When** API를 호출한다.<br>**Then** `EMPTY_COUNT`(또는 동등) 오류가 난다. |
+| **테스트 단계** | **Given** INV-02를 위반한 입력이다.<br>**When** API를 호출한다.<br>**Then** `EMPTY_COUNT`(또는 동등) 오류가 난다; 유효한 `int[6]` 해는 반환되지 않는다. |
+| **Invariant** | INV-02 · **UI-RED-02** |
 
 ---
 
 ## 비고
 
 - 표지의 **작성자·승인자·테스트 조직**과 각 TC의 **테스트 일자**는 조직 절차에 맞게 기입한다.
-- 오류 코드·메시지 문구는 [`PRD.md`](PRD.md) §6.1을 단일 기준으로 한다.
-- Dual-Track RED 매핑·변경 이력은 [`Report/07_Magic_Square_Test_Case_Specification_Report.md`](../Report/07_Magic_Square_Test_Case_Specification_Report.md) v1.1을 참고한다.
+- 오류 코드·메시지 문구는 [`docs/PRD.md`](../docs/PRD.md) §6.1을 단일 기준으로 한다.
+- **Dual-Track RED:** 구현 전에는 해당 테스트가 **실패(RED)** 하는 것이 정상이다. GREEN·REFACTOR 단계는 본 명세 범위 밖이다.
+- 설계 보고서 [`02_Magic_Square_Dual_Track_Clean_Architecture_Design_Report.md`](02_Magic_Square_Dual_Track_Clean_Architecture_Design_Report.md)의 INV-01~06·UC-01~04와 위 표의 Test ID 매핑을 유지한다.
+
+### 변경 이력 (본 보고서)
+
+| 버전 | 일자 | 요약 |
+|------|------|------|
+| 1.0 | 2026-04-28 | TC-MS-A~D 초안 내보내기 |
+| 1.1 | 2026-04-28 | Dual-Track RED 절 추가; `find_not_exist_nums` 반영(TC-MS-A-006); 빈칸 개수 경계(TC-MS-D-007); C-001에 INV-06·출력 계약 명시; 표지 범위 갱신 |

@@ -78,9 +78,31 @@
 - **`pyproject.toml`:** 의존성·포맷터·pytest·커버리지 등 **실행·품질 설정의 단일 진입점**으로 둡니다. 저장소에 파일이 없으면 추가 시 본 절과 PRD §8·[`Report/03`](Report/03_Magic_Square_Cursor_Rules_Report.md) 기준에 맞춥니다.
 
 ```bash
-# 예시 (pyproject.toml 정의 후)
-pytest
+# 저장소 루트에서 (의존성: pip install -e ".[dev]")
+python -m pytest tests -v
+# PowerShell: .\scripts\run_tests.ps1
+# 실패 시: 각 테스트별 FAILED 표시 + 짧은 traceback (--tb=short), 종료 코드 ≠ 0
+# RED 단계에서 실패 출력만 확인하려면(의도적 실패 1건):
+#   PowerShell: $env:MAGICSQUARE_DEMO_RED="1"; python -m pytest tests/test_red_failure_demo.py -v --tb=short
 pytest --cov
+
+# 브라우저용 커버리지 리포트 (저장소 루트에 htmlcov/index.html 생성)
+python -m pytest tests --cov=magicsquare --cov-report=html --cov-report=term-missing -q
+```
+
+**최신 커버리지 스냅샷 (2026-04-28)**
+
+- 테스트: `21 passed, 1 skipped`
+- 패키지 합계(`magicsquare`): **72%**
+- `domain.py`: **100%**, `boundary.py`: **100%**, `constants.py`: **100%**
+- `gui/__main__.py`, `gui/window.py`: 자동화 테스트 미작성으로 **0%**
+- HTML 리포트: `htmlcov/index.html`
+
+**데스크톱 GUI (PyQt6, Screen 레이어):** Qt는 `magicsquare/gui/` 에만 두며, 공식 실행 경로는 아래 한 줄입니다.
+
+```bash
+pip install -e ".[gui]"
+python -m magicsquare.gui
 ```
 
 ---
