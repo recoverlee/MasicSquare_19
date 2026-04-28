@@ -5,3 +5,9 @@ Desktop.ini
 # Editor
 *.swp
 *~
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
